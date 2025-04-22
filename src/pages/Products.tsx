@@ -1,0 +1,194 @@
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { DataTable } from '@/components/common/DataTable';
+import { ProductForm } from '@/components/products/ProductForm';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Plus, MoreHorizontal, Edit, Trash } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Product } from '@/types';
+import { formatCurrency } from '@/lib/utils';
+
+// Mock products data - in a real app, this would come from an API
+const mockProducts: Product[] = [
+  {
+    id: '1',
+    name: 'Laptop',
+    barcode: '123456789',
+    price: 999.99,
+    stock: 10,
+    description: 'High-performance laptop',
+    branchId: '1',
+  },
+  {
+    id: '2',
+    name: 'Wireless Mouse',
+    barcode: '987654321',
+    price: 29.99,
+    stock: 50,
+    description: 'Ergonomic wireless mouse',
+    branchId: '1',
+  },
+  {
+    id: '3',
+    name: 'Mechanical Keyboard',
+    barcode: '456789123',
+    price: 89.99,
+    stock: 25,
+    description: 'Mechanical gaming keyboard',
+    branchId: '1',
+  },
+  {
+    id: '4',
+    name: 'Headphones',
+    barcode: '789123456',
+    price: 149.99,
+    stock: 15,
+    description: 'Noise-cancelling headphones',
+    branchId: '1',
+  },
+  {
+    id: '5',
+    name: 'USB-C Cable',
+    barcode: '321654987',
+    price: 12.99,
+    stock: 100,
+    description: 'Fast charging USB-C cable',
+    branchId: '1',
+  },
+];
+
+export function ProductsPage() {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>(
+    undefined
+  );
+  
+  const isAdmin = user?.role === 'admin';
+  
+  const handleDelete = (id: string) => {
+    setProducts(products.filter((product) => product.id !== id));
+    toast({
+      title: 'Product deleted',
+      description: 'The product has been deleted successfully.',
+    });
+  };
+  
+  const columns: ColumnDef<Product>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Name',
+      cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
+    },
+    {
+      accessorKey: 'barcode',
+      header: 'Barcode',
+    },
+    {
+      accessorKey: 'price',
+      header: 'Price',
+      cell: ({ row }) => formatCurrency(row.getValue('price')),
+    },
+    {
+      accessorKey: 'stock',
+      header: 'Stock',
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const product = row.original;
+        
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {isAdmin && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEditingProduct(product);
+                    setIsFormOpen(true);
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  <span>Edit</span>
+                </DropdownMenuItem>
+              )}
+              {isAdmin && (
+                <DropdownMenuItem
+                  onClick={() => handleDelete(product.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Products</h2>
+        {isAdmin && (
+          <Button onClick={() => {
+            setEditingProduct(undefined);
+            setIsFormOpen(true);
+          }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Product
+          </Button>
+        )}
+      </div>
+      
+      <DataTable
+        columns={columns}
+        data={products}
+        searchPlaceholder="Search products..."
+        searchKey="name"
+      />
+      
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProduct ? 'Edit Product' : 'Add Product'}
+            </DialogTitle>
+          </DialogHeader>
+          <ProductForm
+            product={editingProduct}
+            onSuccess={() => setIsFormOpen(false)}
+            onCancel={() => setIsFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
