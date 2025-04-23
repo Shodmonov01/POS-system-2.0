@@ -75,14 +75,14 @@ const mockProducts: Product[] = [
 export function ProductsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>(
-    undefined
+  const [ products, setProducts ] = useState<Product[]>(mockProducts);
+  const [ isFormOpen, setIsFormOpen ] = useState(false);
+  const [ editingProduct, setEditingProduct ] = useState<Product | undefined>(
+    undefined,
   );
-  
+
   const isAdmin = user?.role === 'admin';
-  
+
   const handleDelete = (id: string) => {
     setProducts(products.filter((product) => product.id !== id));
     toast({
@@ -90,31 +90,31 @@ export function ProductsPage() {
       description: 'The product has been deleted successfully.',
     });
   };
-  
+
   const columns: ColumnDef<Product>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      header: 'Название',
       cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
     },
     {
       accessorKey: 'barcode',
-      header: 'Barcode',
+      header: 'Баркод',
     },
     {
       accessorKey: 'price',
-      header: 'Price',
+      header: 'Цена',
       cell: ({ row }) => formatCurrency(row.getValue('price')),
     },
     {
       accessorKey: 'stock',
-      header: 'Stock',
+      header: 'Остаток',
     },
     {
       id: 'actions',
       cell: ({ row }) => {
         const product = row.original;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -156,7 +156,7 @@ export function ProductsPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Products</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Продукты</h2>
         {isAdmin && (
           <Button onClick={() => {
             setEditingProduct(undefined);
@@ -167,14 +167,14 @@ export function ProductsPage() {
           </Button>
         )}
       </div>
-      
+
       <DataTable
         columns={columns}
         data={products}
-        searchPlaceholder="Search products..."
+        searchPlaceholder="Поиск по названию"
         searchKey="name"
       />
-      
+
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
