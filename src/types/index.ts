@@ -14,7 +14,7 @@ export interface AuthState {
 }
 
 export interface Product {
-  id?: string;
+  // id?: number;
   name: string;
   barcode: string;
   price: number;
