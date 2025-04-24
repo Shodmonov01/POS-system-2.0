@@ -145,7 +145,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
             <FormItem>
               <FormLabel>Филиал</FormLabel>
               <Select
-                onValueChange={field.onChange}
+                onValueChange={(e) => field.onChange(Number(e))}
                 // value={branches[0].id}
                 // disabled={!scannedProduct || isSubmitting}
               >
@@ -156,7 +156,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
                 </FormControl>
                 <SelectContent>
                   {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                    <SelectItem key={String(branch.id)} value={String(branch.id)}>{branch.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
