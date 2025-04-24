@@ -20,7 +20,7 @@ export interface Product {
   price: number;
   stock: number;
   description?: string;
-  branchId?: string;
+  branch_id?: number;
 }
 
 export interface CartItem {

@@ -14,10 +14,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/types';
+import { Branch, Product } from '@/types';
 import {
   useMutation, useQueryClient,
 } from '@tanstack/react-query';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 
 
 const createProduct = async (payload: Product) => {
@@ -38,17 +39,19 @@ const formSchema = z.object({
   price: z.number().min(0, 'Price must be 0 or greater'),
   stock: z.number().min(0, 'Stock must be 0 or greater'),
   description: z.string().optional(),
+  branch_id: z.number().min(1, 'Филиал должен быть выбран'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
   product?: Product;
+  branches: Branch[];
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
+export function ProductForm({ product, branches, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
   const [ isSubmitting, setIsSubmitting ] = useState(false);
 
@@ -67,6 +70,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     price: product?.price || 0,
     stock: product?.stock || 0,
     description: product?.description || '',
+    branch_id: product?.branch_id || 0,
   };
 
   const form = useForm<FormData>({
@@ -129,6 +133,33 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               <FormControl>
                 <Input placeholder="Enter barcode" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="branch_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Филиал</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                // value={branches[0].id}
+                // disabled={!scannedProduct || isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите филиал" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

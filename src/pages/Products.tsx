@@ -18,7 +18,7 @@ import {
   Trash,
 } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Product } from '@/types';
+import { Branch, Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
 import axios from 'axios';
@@ -45,6 +45,13 @@ export function ProductsPage() {
   );
 
   const { data: dataProducts } = useQuery({ queryKey: [ 'products' ], queryFn: fetchProducts });
+
+  const { data: dataBranches } = useQuery({
+    queryKey: [ 'branches' ],
+    queryFn: async (): Promise<Branch[]> => {
+      return (await axios.get(`/api/branch/all`)).data;
+    },
+  });
 
 
   const isAdmin = user?.role === 'admin';
@@ -164,6 +171,7 @@ export function ProductsPage() {
           </DialogHeader>
           <ProductForm
             product={editingProduct}
+            branches={dataBranches ?? []}
             onSuccess={() => setIsFormOpen(false)}
             onCancel={() => setIsFormOpen(false)}
           />
