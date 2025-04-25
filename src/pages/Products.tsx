@@ -76,6 +76,16 @@ export function ProductsPage() {
     });
   };
 
+  const [ searchValue, setSearchValue ] = useState('');
+
+  const querySearchProducts = useQuery({
+    queryKey: [ searchValue ],
+    queryFn: async (): Promise<Product[]> => {
+      return (await axios.get(`/api/product/search`, { params: { q: `${searchValue}` } })).data;
+    },
+    enabled: Boolean(searchValue),
+  });
+
   const columns: ColumnDef<Product>[] = [
     {
       accessorKey: 'name',
@@ -156,9 +166,10 @@ export function ProductsPage() {
       {dataProducts && (
         <DataTable
           columns={columns}
-          data={dataProducts}
+          data={(searchValue && querySearchProducts.data) || dataProducts}
           searchPlaceholder="Поиск по названию"
           searchKey="name"
+          handleChangeSearch={setSearchValue}
         />
       )}
 
