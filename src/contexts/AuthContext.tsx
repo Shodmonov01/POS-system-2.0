@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { AuthState, User } from '../types';
 import { jwtDecode } from 'jwt-decode';
+import { authApi } from '../api/authApi';
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (login: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -42,47 +43,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // In a real app, this would make an API call
-    // For this demo, we'll simulate a successful login with mock data
-    const mockUsers = [
-      {
-        id: '1',
-        name: 'Admin User',
-        email: 'admin@example.com',
-        role: 'admin',
-        branchId: '1',
-      },
-      {
-        id: '2',
-        name: 'Cashier User',
-        email: 'cashier@example.com',
-        role: 'cashier',
-        branchId: '1',
-      },
-    ];
-
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const user = mockUsers.find((u) => u.email === email);
-    
-    if (user && password === 'password') {
-      // Create a mock JWT token with the user info
-      const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
-        JSON.stringify({ user })
-      )}.mock-signature`;
-
+  const login = async (login: string, password: string) => {
+    try {
+      // Вызываем реальный API для аутентификации
+      const response = await authApi.login({ login, password });
+      const { token, user } = response.data;
+      
+      // Сохраняем токен в localStorage
       localStorage.setItem('token', token);
       
+      // Обновляем состояние аутентификации
       setAuthState({
-        user: user as User,
+        user,
         token,
         isAuthenticated: true,
         isLoading: false,
       });
-    } else {
-      throw new Error('Invalid email or password');
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw new Error('Неверный логин или пароль');
     }
   };
 

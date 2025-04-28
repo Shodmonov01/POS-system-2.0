@@ -1,8 +1,7 @@
 import apiClient from './api'
-import { LoginCredentials, LoginResponse, ApiResponse } from '../types/api'
-import { AxiosResponse } from 'axios'
+import {  LoginResponse, LoginRequest } from '../types/api'
 
 export const authApi = {
-    login: (credentials: LoginCredentials): Promise<AxiosResponse<ApiResponse<LoginResponse>>> =>
-        apiClient.post('/auth/login', credentials)
-}
+    login: (credentials: LoginRequest) => 
+      apiClient.post<LoginResponse>('/auth/login', credentials),
+  };

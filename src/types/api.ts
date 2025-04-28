@@ -15,10 +15,7 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
-  user: User;  
-}
+
 
 export interface Cashier {
   id: number;
@@ -38,4 +35,20 @@ export interface Product {
   name: string;
   price: number;
   category?: string;
+}
+
+export interface LoginRequest {
+  login: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    branchId: string;
+  };
 }
