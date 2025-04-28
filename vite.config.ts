@@ -12,4 +12,16 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://213.139.210.248:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
+
 });

@@ -14,14 +14,22 @@ import { BranchesPage } from './pages/Branches';
 import { SettingsPage } from './pages/Settings';
 import { Toaster } from './components/ui/toaster';
 
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            
+
             <Route
               path="/"
               element={
@@ -46,6 +54,7 @@ function App() {
         <Toaster />
       </CartProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
