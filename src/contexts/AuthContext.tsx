@@ -1,7 +1,8 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import {AuthState, User} from '../types';
 import {jwtDecode} from 'jwt-decode';
-import apiClient from "@/lib/apiClient.ts";
+import apiClient from "@/api/api.ts";
+
 
 
 interface AuthContextType extends AuthState {
