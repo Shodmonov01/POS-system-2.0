@@ -24,6 +24,7 @@ import { ShoppingCart, Users, CreditCard, Check, Trash } from 'lucide-react';
 import { CartItem } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
+
 export function Cart() {
   const { items, removeItem, total, markAllAsDebt, customer } = useCart();
   const [editingItem, setEditingItem] = useState<CartItem | null>(null);

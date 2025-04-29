@@ -146,18 +146,35 @@ export function BarcodeInput({
   };
 
   // Handle keydown events
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  // const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter' && value.trim()) {
+  //     if (isValidBarcode(value)) {
+  //       setIsProcessing(true);
+  //       onScan(value.trim());
+  //       setValue('');
+  //     } else {
+  //       setValue(''); // Clear invalid input
+  //     }
+  //     e.preventDefault(); // Prevent form submission
+  //   }
+  // };
+
+  const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && value.trim()) {
+      e.preventDefault();
       if (isValidBarcode(value)) {
         setIsProcessing(true);
-        onScan(value.trim());
+        await onScan(value.trim()); // Ждём завершения сканирования
         setValue('');
+        setIsProcessing(false);
+        e.preventDefault();
+        inputRef.current?.focus();
       } else {
-        setValue(''); // Clear invalid input
+        setValue('');
       }
-      e.preventDefault(); // Prevent form submission
     }
   };
+  
 
   // Keep input focused when clicked elsewhere
   useEffect(() => {
@@ -178,28 +195,52 @@ export function BarcodeInput({
     let scanTimer: ReturnType<typeof setTimeout>;
     let lastInputTime = 0;
 
+    // const handleScannerInput = () => {
+    //   const now = Date.now();
+    //   const isRapidInput = now - lastInputTime < 50; // Scanner typically inputs rapidly
+
+    //   if (isRapidInput && !isScanning) {
+    //     setIsScanning(true);
+    //   }
+
+    //   lastInputTime = now;
+
+    //   // Reset scanning state after a short delay
+    //   clearTimeout(scanTimer);
+    //   scanTimer = setTimeout(() => {
+    //     if (isScanning && value.trim() && isValidBarcode(value)) {
+    //       setIsProcessing(true);
+    //       onScan(value.trim());
+    //       setValue('');
+    //     }
+    //     setIsScanning(false);
+    //     setIsProcessing(false);
+    //   }, 100);
+    // };
+
     const handleScannerInput = () => {
       const now = Date.now();
-      const isRapidInput = now - lastInputTime < 50; // Scanner typically inputs rapidly
-
+      const isRapidInput = now - lastInputTime < 50;
+    
       if (isRapidInput && !isScanning) {
         setIsScanning(true);
       }
-
+    
       lastInputTime = now;
-
-      // Reset scanning state after a short delay
+    
       clearTimeout(scanTimer);
-      scanTimer = setTimeout(() => {
+      scanTimer = setTimeout(async () => {
         if (isScanning && value.trim() && isValidBarcode(value)) {
           setIsProcessing(true);
-          onScan(value.trim());
+          await onScan(value.trim()); // ← Ждём завершения
           setValue('');
+          setIsProcessing(false);     // ← Только потом разблокируем
         }
         setIsScanning(false);
-        setIsProcessing(false);
       }, 100);
+      
     };
+    
 
     if (value) {
       handleScannerInput();
