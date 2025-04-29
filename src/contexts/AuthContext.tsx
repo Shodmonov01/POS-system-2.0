@@ -20,17 +20,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
       try {
-        const decoded = jwtDecode<{ user: User }>(token);
+        const user = JSON.parse(userData) as User;
+        
         setAuthState({
-          user: decoded.user,
+          user,
           token,
           isAuthenticated: true,
           isLoading: false,
         });
       } catch (error) {
+        // If parsing fails, clear storage
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setAuthState({
           user: null,
           token: null,
@@ -49,8 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await authApi.login({ login, password });
       const { token, user } = response.data;
       
-      // Сохраняем токен в localStorage
+      // Сохраняем токен и данные пользователя в localStorage
       localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Обновляем состояние аутентификации
       setAuthState({
@@ -67,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setAuthState({
       user: null,
       token: null,

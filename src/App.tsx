@@ -5,7 +5,7 @@ import { RequireAuth } from './components/common/RequireAuth';
 import { Layout } from './components/layout/Layout';
 import { LoginPage } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
-import { SalesPage } from './pages/Sales';
+import { ScanerPage } from './pages/Scaner';
 import { ProductsPage } from './pages/Products';
 import { DebtsPage } from './pages/Debts';
 import { ReturnsPage } from './pages/Returns';
@@ -18,6 +18,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
+import { SalesPage } from './pages/Sales';
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="scaner" element={<ScanerPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route path="products" element={<ProductsPage />} />
               <Route path="debts" element={<DebtsPage />} />

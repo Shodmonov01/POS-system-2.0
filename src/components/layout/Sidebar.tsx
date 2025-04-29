@@ -10,6 +10,7 @@ import {
   UserCircle2,
   Building,
   Settings,
+  ScanBarcode 
 } from 'lucide-react';
 
 interface SidebarLink {
@@ -34,6 +35,12 @@ export function Sidebar() {
       href: '/sales',
       label: 'Продажи',
       icon: <ShoppingBag className="h-5 w-5" />,
+      roles: ['admin'],
+    },
+    {
+      href: '/scaner',
+      label: 'Сканер',
+      icon: <ScanBarcode  className="h-5 w-5" />,
       roles: ['admin', 'cashier'],
     },
     {
