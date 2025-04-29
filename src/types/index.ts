@@ -14,13 +14,13 @@ export interface AuthState {
 }
 
 export interface Product {
-  id: string;
+  // id?: number;
   name: string;
   barcode: string;
   price: number;
   stock: number;
-  description: string;
-  branchId: string;
+  description?: string;
+  branch_id?: number;
 }
 
 export interface CartItem {

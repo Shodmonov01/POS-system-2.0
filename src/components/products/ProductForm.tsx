@@ -14,7 +14,24 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Product } from '@/types';
+import { Branch, Product } from '@/types';
+import {
+  useMutation, useQueryClient,
+} from '@tanstack/react-query';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+
+
+const createProduct = async (payload: Product) => {
+  const res = await fetch('/api/product/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+};
+
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -22,46 +39,72 @@ const formSchema = z.object({
   price: z.number().min(0, 'Price must be 0 or greater'),
   stock: z.number().min(0, 'Stock must be 0 or greater'),
   description: z.string().optional(),
+  branch_id: z.number().min(1, 'Филиал должен быть выбран'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface ProductFormProps {
   product?: Product;
+  branches: Branch[];
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
+export function ProductForm({ product, branches, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [ isSubmitting, setIsSubmitting ] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: createProduct,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [ 'products' ] });
+    },
+  });
+
   const defaultValues: FormData = {
     name: product?.name || '',
     barcode: product?.barcode || '',
     price: product?.price || 0,
     stock: product?.stock || 0,
     description: product?.description || '',
+    branch_id: product?.branch_id || 0,
   };
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-  
-  const onSubmit = (data: FormData) => {
+
+  const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    
-    // In a real app, this would make an API call to save the product
-    setTimeout(() => {
-      toast({
-        title: product ? 'Product updated' : 'Product created',
-        description: `${data.name} has been ${product ? 'updated' : 'created'} successfully.`,
-      });
-      
+
+    const tmp = await mutation.mutateAsync(data);
+
+    if (tmp.statusCode > 201) {
       setIsSubmitting(false);
-      onSuccess();
-    }, 1000);
+      return;
+    }
+
+    onSuccess();
+
+    toast({
+      title: product ? 'Product updated' : 'Product created',
+      description: `${data.name} has been ${product ? 'updated' : 'created'} successfully.`,
+    });
+
+    // In a real app, this would make an API call to save the product
+    // setTimeout(() => {
+    //   toast({
+    //     title: product ? 'Product updated' : 'Product created',
+    //     description: `${data.name} has been ${product ? 'updated' : 'created'} successfully.`,
+    //   });
+    //
+    //   setIsSubmitting(false);
+    //   onSuccess();
+    // }, 1000);
   };
 
   return (
@@ -80,7 +123,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="barcode"
@@ -94,7 +137,34 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </FormItem>
           )}
         />
-        
+
+        <FormField
+          control={form.control}
+          name="branch_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Филиал</FormLabel>
+              <Select
+                onValueChange={(e) => field.onChange(Number(e))}
+                // value={branches[0].id}
+                // disabled={!scannedProduct || isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите филиал" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {branches.map((branch) => (
+                    <SelectItem key={String(branch.id)} value={String(branch.id)}>{branch.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <FormField
             control={form.control}
@@ -116,7 +186,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="stock"
@@ -137,7 +207,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             )}
           />
         </div>
-        
+
         <FormField
           control={form.control}
           name="description"
@@ -155,7 +225,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </FormItem>
           )}
         />
-        
+
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
@@ -164,8 +234,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             {isSubmitting
               ? 'Saving...'
               : product
-              ? 'Update Product'
-              : 'Create Product'}
+                ? 'Update Product'
+                : 'Create Product'}
           </Button>
         </div>
       </form>

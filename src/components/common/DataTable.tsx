@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   SortingState,
   getFilteredRowModel,
-  RowData,
+  // RowData,
 } from '@tanstack/react-table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ interface DataTableProps<TData> {
   searchKey?: string;
   onRowClick?: (row: TData) => void;
   isLoading?: boolean;
+  handleChangeSearch?: (val: string) => void;
 }
 
 export function DataTable<TData>({
@@ -38,9 +39,19 @@ export function DataTable<TData>({
   searchKey,
   onRowClick,
   isLoading = false,
+  handleChangeSearch,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
+
+  const [localFilter, setLocalFilter] = useState('');
+
+  useEffect(() => {
+    if (handleChangeSearch) {
+      handleChangeSearch(localFilter);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ localFilter ]);
 
   const table = useReactTable({
     data,
@@ -69,13 +80,14 @@ export function DataTable<TData>({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
-            value={globalFilter ?? ''}
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            value={localFilter ?? ''}
+            // onChange={(e) => setGlobalFilter(e.target.value)}
+            onChange={(e) => setLocalFilter(e.target.value)}
             className="pl-10"
           />
         </div>
       )}
-      
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -135,7 +147,7 @@ export function DataTable<TData>({
           </TableBody>
         </Table>
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
