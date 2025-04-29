@@ -56,7 +56,7 @@ export function Sidebar() {
     },
     {
       href: '/users',
-      label: 'Пользователи',
+      label: 'Кассир',
       icon: <UserCircle2 className="h-5 w-5" />,
       roles: ['admin'],
     },
