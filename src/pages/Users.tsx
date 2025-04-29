@@ -45,7 +45,8 @@ export function UsersPage() {
     const fetchCashiers = async () => {
         try {
             const response = await cashierApi.getAll();
-            setCashiers(response.data.data);
+            console.log(response.data);
+            setCashiers(response.data);
         } catch (error) {
             console.error(error);
             toast({title: "Ошибка загрузки кассиров", variant: "destructive"});
