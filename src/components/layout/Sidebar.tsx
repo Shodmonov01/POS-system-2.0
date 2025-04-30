@@ -29,7 +29,7 @@ export function Sidebar() {
       href: '/dashboard',
       label: 'Панель управления',
       icon: <LayoutDashboard className="h-5 w-5" />,
-      roles: ['admin', 'cashier'],
+      roles: ['admin'],
     },
     {
       href: '/sales',
@@ -38,10 +38,10 @@ export function Sidebar() {
       roles: ['admin'],
     },
     {
-      href: '/scaner',
+      href: '/dashboard',
       label: 'Сканер',
       icon: <ScanBarcode  className="h-5 w-5" />,
-      roles: ['admin', 'cashier'],
+      roles: ['cashier'],
     },
     {
       href: '/products',

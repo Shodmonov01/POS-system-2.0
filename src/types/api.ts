@@ -5,6 +5,9 @@ export interface User<T = any> {
 }
 
 export interface ApiResponse<T> {
+  price: number;
+  name: string;
+  barcode: string;
   data: T;
   status: number;
   message?: string;
@@ -51,4 +54,18 @@ export interface LoginResponse {
     role: string;
     branchId: string;
   };
+}
+
+export interface CreateSaleData {
+  item_barcode: string;
+  price: number;
+  quantity: number;
+  description: string;
+}
+
+export interface Sale {
+  item_barcode: string;
+  price: number;
+  quantity: number;
+  description: string;
 }
