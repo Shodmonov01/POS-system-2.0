@@ -19,17 +19,23 @@ import {
   useMutation, useQueryClient,
 } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { productApi } from '@/api/productApi';
 
+
+// const createProduct = async (payload: Product) => {
+//   const res = await fetch('/api/product/create', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json; charset=utf-8',
+//     },
+//     body: JSON.stringify(payload),
+//   });
+//   return res.json();
+// };
 
 const createProduct = async (payload: Product) => {
-  const res = await fetch('/api/product/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: JSON.stringify(payload),
-  });
-  return res.json();
+  const response = await productApi.create(payload);
+  return response.data.data; // Предполагается, что ApiResponse содержит поле data с созданным продуктом
 };
 
 
