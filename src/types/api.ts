@@ -55,3 +55,17 @@ export interface LoginResponse {
     branchId: string;
   };
 }
+
+export interface CreateSaleData {
+  item_barcode: string;
+  price: number;
+  quantity: number;
+  description: string;
+}
+
+export interface Sale {
+  item_barcode: string;
+  price: number;
+  quantity: number;
+  description: string;
+}

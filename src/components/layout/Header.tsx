@@ -14,7 +14,8 @@ export function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    // <header className="mx-5 sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="mx-6 sticky top-2 z-50">
       <div className="flex h-14 items-center">
         <div className="mr-4 flex items-center space-x-2">
           <ShoppingCart className="h-6 w-6" />
@@ -32,8 +33,8 @@ export function Header() {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
-                    <User className="h-5 w-5" />
+                  <Button variant="outline" size="sm" className="relative h-10 w-10 rounded-full">
+                    <User className="h-10 w-10" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
