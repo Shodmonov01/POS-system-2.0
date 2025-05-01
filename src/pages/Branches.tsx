@@ -31,6 +31,14 @@ export function BranchesPage() {
     const deleteMutation = useMutation({
         mutationFn: (id: number) => branchApi.delete(id),
         onSuccess: () => queryClient.invalidateQueries({queryKey: ['branches']}),
+        onError: (err: AxiosError) => {
+            console.error('Delete failed:', err.response?.status, err.response?.data);
+            alert(
+                `Could not delete branch: ${
+                    err.response?.data?.error || err.message
+                }`
+            );
+        },
     })
 
     if (isLoading) return <p>Loading branches…</p>
