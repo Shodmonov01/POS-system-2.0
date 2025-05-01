@@ -1,6 +1,6 @@
 import apiClient from './api'
-import { Branch, ApiResponse } from '../types/api'
-import { AxiosResponse } from 'axios'
+import {ApiResponse, Branch} from '../types/api'
+import {AxiosResponse} from 'axios'
 
 export const branchApi = {
     //getAll: (): Promise<AxiosResponse<ApiResponse<Branch[]>>> => apiClient.get('/branch/all'),
