@@ -13,13 +13,13 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
 
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://213.139.210.248:3000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'http://213.139.210.248:3000',
+  //       changeOrigin: true,
+  //       rewrite: (path) => path.replace(/^\/api/, ''),
+  //     },
+  //   },
+  // },
 });
