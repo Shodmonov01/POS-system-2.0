@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Branch, Product } from '@/types'
+import { Branch, Product } from '@/types/api.ts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { productApi } from '@/api/productApi'
@@ -65,10 +65,10 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
     const defaultValues: FormData = {
         name: product?.name || '',
         barcode: product?.barcode || '',
-        price: product?.price ? Number(product.price).toFixed(2) : '', // Empty string for new product
-        stock: product?.stock ? String(product.stock) : '', // Empty string for new product
+        price: product?.price || 0,
+        stock: product?.stock || 0,
         description: product?.description || '',
-        branch_id: product?.branch_id ? String(product.branch_id) : '0' // Default to '0' for select
+        branch_id: product?.branch_id || 0,
     }
 
     const form = useForm<FormData>({
@@ -160,7 +160,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Филиал</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select onValueChange={field.onChange} value={String(field.value)}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder='Выберите филиал' />
