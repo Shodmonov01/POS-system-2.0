@@ -1,9 +1,10 @@
-import apiClient from './api'
-import {ApiResponse, Branch} from '../types/api'
 import {AxiosResponse} from 'axios'
 
+import {ApiResponse, Branch} from '../types/api'
+import apiClient from './api'
+
+
 export const branchApi = {
-    //getAll: (): Promise<AxiosResponse<ApiResponse<Branch[]>>> => apiClient.get('/branch/all'),
     getAll: (): Promise<AxiosResponse<Branch[]>> => apiClient.get('/branch/all'),
 
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Branch>>> => apiClient.get(`/branch/${id}`),
