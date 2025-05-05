@@ -34,6 +34,10 @@ export interface Product {
     name: string;
     price: number;
     category?: string;
+    stock: number;
+    description?: string;
+    branch_id?: number;
+    created_at?: Date;
 }
 
 export interface LoginRequest {
