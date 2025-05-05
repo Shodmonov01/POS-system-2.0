@@ -1,18 +1,20 @@
-import {useEffect, useState} from 'react';
+import {useMemo, useState} from 'react';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {Plus} from 'lucide-react';
+import type {AxiosError} from 'axios';
+
 import {DataTable} from '@/components/common/DataTable';
 import {Button} from '@/components/ui/button';
-import {Plus} from 'lucide-react';
-import {ColumnDef} from '@tanstack/react-table';
-import {Badge} from '@/components/ui/badge';
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
-import {useToast} from "@/hooks/use-toast.ts";
-import {useAuth} from "@/contexts/AuthContext.tsx";
-import {Cashier} from "@/types/api.ts";
-import {CashierForm} from "@/components/cashiers/CashierForm.tsx";
-import {cashierApi} from "@/api/cashierApi.ts";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getUserColumns} from "@/components/cashiers/Columns.tsx";
-import {AxiosError} from "axios";
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {useToast} from '@/hooks/use-toast';
+import {useAuth} from '@/contexts/AuthContext';
+import {CashierForm} from '@/components/cashiers/CashierForm';
+import {getUserColumns} from '@/components/cashiers/Columns';
+import {cashierApi} from '@/api/cashierApi';
+
+import type {Cashier} from '@/types/api';
+import {ColumnDef} from "@tanstack/react-table";
+
 
 
 export function UsersPage() {
@@ -23,35 +25,67 @@ export function UsersPage() {
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<Cashier | undefined>()
 
-    const queryClient = useQueryClient()
+    const queryClient = useQueryClient();
 
-    const { data: users = [], isLoading, error } = useQuery<Cashier[], AxiosError>({
+    const {
+        data: users = [],
+        isLoading: isUsersLoading,
+        isError: isUsersError,
+        error: usersError,
+    } = useQuery<Cashier[], AxiosError>({
         queryKey: ['users'],
-        queryFn: async () => (await cashierApi.getAll()).data,
         staleTime: 5 * 60 * 1000,
-        onError: () => toast({ title: 'Ошибка загрузки пользователей', variant: 'destructive' }),
-    })
+        queryFn: async () => {
+            const res = await cashierApi.getAll();
+            console.log(res.data);
+            return res.data.data ?? [];
+        },
+        onError: () => {
+            toast({title: 'Ошибка загрузки пользователей', variant: 'destructive'});
+        },
+    });
 
-    const deleteMutation = useMutation({
+    const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
-    })
+        onSuccess: () => queryClient.invalidateQueries({queryKey: ['users']}),
+        onError: (err: AxiosError) =>
+            toast({
+                title: 'Ошибка удаления пользователя',
+                description: err.message,
+                variant: 'destructive',
+            }),
+    });
 
-    if (isLoading) return <p>Loading users…</p>
-    if (error) return <p>Error loading users: {error.message}</p>
+    const columns: ColumnDef<Cashier>[] = useMemo(
+        () =>
+            getUserColumns(
+                user => {
+                    setEditingUser(user);
+                    setIsFormOpen(true);
+                },
+                id => deleteUser(id)
+            ),
+        [deleteUser]
+    );
 
-    const columns = getUserColumns(
-        usr => { setEditingUser(usr); setIsFormOpen(true) },
-        id => deleteMutation.mutate(id)
-    )
+    console.log('🎉 rendering UsersPage, users=', users);
+
+    if (isUsersLoading) return <p>Loading users…</p>;
+    if (isUsersError) return <p>Error loading users: {usersError?.message}</p>;
 
     return (
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Пользователи</h2>
                 {isAdmin && (
-                    <Button onClick={() => { setEditingUser(undefined); setIsFormOpen(true) }}>
-                        <Plus className="mr-2 h-4 w-4" /> Добавить пользователя
+                    <Button
+                        onClick={() => {
+                            setEditingUser(undefined);
+                            setIsFormOpen(true);
+                        }}
+                    >
+                        <Plus className="mr-2 h-4 w-4"/>
+                        Добавить пользователя
                     </Button>
                 )}
             </div>
@@ -72,11 +106,14 @@ export function UsersPage() {
                     </DialogHeader>
                     <CashierForm
                         cashier={editingUser}
-                        onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['users'] }); setIsFormOpen(false) }}
+                        onSuccess={() => {
+                            queryClient.invalidateQueries({queryKey: ['users']});
+                            setIsFormOpen(false);
+                        }}
                         onCancel={() => setIsFormOpen(false)}
                     />
                 </DialogContent>
             </Dialog>
         </div>
-    )
+    );
 }
