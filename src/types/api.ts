@@ -17,18 +17,16 @@ export interface LoginCredentials {
     password: string;
 }
 
-
 export interface Cashier {
     id: number;
     name: string;
-    email: string;
+    branchId: number;
 }
 
 export interface Branch {
     id: number;
     name: string;
     address: string;
-
 }
 
 export interface Product {
