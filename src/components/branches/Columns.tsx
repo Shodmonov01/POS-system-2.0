@@ -1,6 +1,6 @@
-import {ColumnDef} from '@tanstack/react-table'
-import {Branch} from '@/types'
-import {Button} from '@/components/ui/button'
+import {ColumnDef} from '@tanstack/react-table';
+import {Button} from '@/components/ui/button';
+import {Branch} from '@/types';
 
 
 export function getBranchColumns(
@@ -28,14 +28,14 @@ export function getBranchColumns(
                             variant="outline"
                             onClick={() => onEdit(branch)}
                         >
-                            Edit
+                            Изменить
                         </Button>
                         <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => onDelete(branch.id)}
+                            onClick={() => onDelete(+branch.id)}
                         >
-                            Delete
+                            Удалить
                         </Button>
                     </div>
                 )
