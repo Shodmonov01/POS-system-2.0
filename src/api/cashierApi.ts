@@ -1,17 +1,34 @@
 import apiClient from './api'
-import { Cashier, ApiResponse } from '../types/api'
-import { AxiosResponse } from 'axios'
+import {ApiResponse, Cashier} from '../types/api'
+import {AxiosResponse} from 'axios'
+import {CashierFormFields} from "@/types/forms.ts";
+
 
 export const cashierApi = {
-    getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> => apiClient.get('/cashier/all'),
+    getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> =>
+        apiClient.get<ApiResponse<Cashier[]>>('/cashier/all'),
 
-    getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> => apiClient.get(`/cashier/${id}`),
+    getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
+        apiClient.get<ApiResponse<Cashier>>(`/cashier/${id}`),
 
-    create: (data: Omit<Cashier, 'id'>): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
-        apiClient.post('/cashier/create', data),
+    create: (
+        data: CashierFormFields
+    ): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
+        apiClient.post<ApiResponse<Cashier>>('/cashier/create', data),
 
-    update: (id: number, data: Partial<Cashier>): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
-        apiClient.put(`/cashier/update/${id}`, data),
+    update: (
+        id: number,
+        data: Partial<CashierFormFields>
+    ): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
+        apiClient.put<ApiResponse<Cashier>>(
+            `/cashier/update/${id}`,
+            data
+        ),
 
-    delete: (id: number): Promise<AxiosResponse<ApiResponse<void>>> => apiClient.delete(`/cashier/delete/${id}`)
+    delete: (
+        id: number
+    ): Promise<AxiosResponse<ApiResponse<void>>> =>
+        apiClient.delete<ApiResponse<void>>(
+            `/cashier/delete/${id}`
+        ),
 }
