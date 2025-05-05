@@ -1,7 +1,7 @@
 import {useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {ColumnDef} from "@tanstack/react-table";
-import {Plus} from 'lucide-react';
+import {LoaderPinwheel, Plus} from 'lucide-react';
 
 import {DataTable} from '@/components/common/DataTable';
 import {Button} from '@/components/ui/button';
@@ -65,8 +65,13 @@ export function BranchesPage() {
     );
 
     if (isBranchesLoading) {
-        return <p>Loading branches…</p>;
+        return (
+            <div className="centered-spin-icon">
+                <LoaderPinwheel className="spin-icon"/>
+            </div>
+        )
     }
+
     if (isBranchesError) {
         return <p>Error loading branches: {branchesError?.message}</p>;
     }

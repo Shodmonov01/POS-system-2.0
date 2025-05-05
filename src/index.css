@@ -58,6 +58,25 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.centered-spin-icon {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
+  padding-top: 150px;
+}
+
+.spin-icon {
+  width: 80px;
+  height: 80px;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
