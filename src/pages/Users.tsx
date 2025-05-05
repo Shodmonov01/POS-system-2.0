@@ -1,21 +1,19 @@
 import {useMemo, useState} from 'react';
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {Plus} from 'lucide-react';
+import {useMutation, useQuery, useQueryClient, UseQueryResult} from '@tanstack/react-query';
+import {ColumnDef} from "@tanstack/react-table";
 import type {AxiosError} from 'axios';
+import {LoaderPinwheel, Plus} from 'lucide-react';
 
+import {cashierApi} from '@/api/cashierApi';
+import {CashierForm} from '@/components/cashiers/CashierForm';
+import {getUserColumns} from '@/components/cashiers/Columns';
 import {DataTable} from '@/components/common/DataTable';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/contexts/AuthContext';
-import {CashierForm} from '@/components/cashiers/CashierForm';
-import {getUserColumns} from '@/components/cashiers/Columns';
-import {cashierApi} from '@/api/cashierApi';
 
 import type {Cashier} from '@/types/api';
-import {ColumnDef} from "@tanstack/react-table";
-
-
 
 export function UsersPage() {
     const {toast} = useToast();
@@ -32,28 +30,21 @@ export function UsersPage() {
         isLoading: isUsersLoading,
         isError: isUsersError,
         error: usersError,
-    } = useQuery<Cashier[], AxiosError>({
+    }: UseQueryResult<Cashier[], AxiosError> = useQuery({
         queryKey: ['users'],
+        queryFn: () => cashierApi.getAll().then(res => res.data),
         staleTime: 5 * 60 * 1000,
-        queryFn: async () => {
-            const res = await cashierApi.getAll();
-            console.log(res.data);
-            return res.data.data ?? [];
-        },
-        onError: () => {
-            toast({title: 'Ошибка загрузки пользователей', variant: 'destructive'});
-        },
     });
 
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
-        onSuccess: () => queryClient.invalidateQueries({queryKey: ['users']}),
-        onError: (err: AxiosError) =>
-            toast({
-                title: 'Ошибка удаления пользователя',
-                description: err.message,
-                variant: 'destructive',
-            }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['users']});
+        },
+        onError: (err: AxiosError) => {
+            console.error('Delete failed:', err.response?.status, err.response?.data);
+            alert(`Could not delete user: ${err.message}`);
+        },
     });
 
     const columns: ColumnDef<Cashier>[] = useMemo(
@@ -68,9 +59,12 @@ export function UsersPage() {
         [deleteUser]
     );
 
-    console.log('🎉 rendering UsersPage, users=', users);
 
-    if (isUsersLoading) return <p>Loading users…</p>;
+    if (isUsersLoading) return (
+        <div className="centered-spin-icon">
+            <LoaderPinwheel className="spin-icon"/>
+        </div>
+    );
     if (isUsersError) return <p>Error loading users: {usersError?.message}</p>;
 
     return (
