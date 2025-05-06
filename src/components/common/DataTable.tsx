@@ -4,7 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
+  // getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   getFilteredRowModel,
@@ -25,26 +25,37 @@ import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
+  rowCount?: number | undefined;
   searchPlaceholder?: string;
   searchKey?: string;
   onRowClick?: (row: TData) => void;
   isLoading?: boolean;
   handleChangeSearch?: (val: string) => void;
+  pageSize?: number;
+  handleChangePagination?: (val: any) => void;
 }
 
 export function DataTable<TData>({
   columns,
   data,
+  rowCount,
   searchPlaceholder = 'Search...',
   searchKey,
   onRowClick,
   isLoading = false,
   handleChangeSearch,
+  pageSize = 10,
+  handleChangePagination,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
   const [localFilter, setLocalFilter] = useState('');
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize,
+  });
 
   useEffect(() => {
     if (handleChangeSearch) {
@@ -53,18 +64,30 @@ export function DataTable<TData>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ localFilter ]);
 
+  useEffect(() => {
+    if (handleChangePagination) {
+      handleChangePagination(pagination);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ pagination ]);
+
+
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
+    rowCount,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    // getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
     state: {
       sorting,
       globalFilter,
+      pagination,
     },
   });
 
@@ -94,7 +117,7 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} /*className={header.id === 'name' ? 'w-1/5' : ''}*/>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -155,7 +178,11 @@ export function DataTable<TData>({
             (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
             table.getFilteredRowModel().rows.length
           )}{' '}
-          of {table.getFilteredRowModel().rows.length} results
+          {!rowCount && (
+            <>of {table.getFilteredRowModel().rows.length} results</>
+          ) || (
+            <>of {rowCount} results</>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           <Button

@@ -12,9 +12,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Edit, MoreHorizontal, Plus, Trash } from 'lucide-react';
-import { Product } from '@/types';
+import { Product } from '@/types/api.ts';
 import { formatCurrency } from '@/lib/utils';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery, useMutation, useQueryClient, keepPreviousData,
+} from '@tanstack/react-query';
 import { productApi, ProductSearchParams } from '@/api/productApi';
 import { branchApi } from '@/api/branchApi';
 import { ColumnDef } from '@tanstack/react-table';
@@ -115,9 +117,9 @@ const columns: ColumnDef<Product>[] = [
 ];
 
 // Функции для получения данных
-const fetchProducts = async (page: number = 1): Promise<Product[]> => {
+const fetchProducts = async (page: number = 1, pageSize: number = 10): Promise<Product[]> => {
   try {
-    const response = await productApi.getAll(page);
+    const response = await productApi.getAll(page, pageSize);
     return response.data;
   } catch (error) {
     throw new Error('Не удалось загрузить продукты: ' + error.message);
@@ -153,10 +155,19 @@ export function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [searchValue, setSearchValue] = useState('');
 
+  const [ pagePagination, setPagePagination ] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   // Получение продуктов
   const { data: dataProducts, isLoading, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => fetchProducts(1),
+    queryKey: [ 'products', pagePagination.pageIndex + 1 ],
+    queryFn: () => fetchProducts(
+      pagePagination.pageIndex + 1, // TODO: +1 потому что на беке страницы с 1 формируются, возможно править бек
+      pagePagination.pageSize,
+    ),
+    placeholderData: keepPreviousData,
   });
 
   // Получение филиалов
@@ -198,7 +209,7 @@ export function ProductsPage() {
   };
 
   // Данные для отображения: результаты поиска или все продукты
-  const displayData = searchValue && searchResults ? searchResults : dataProducts || [];
+  const displayData = searchValue && searchResults ? searchResults : dataProducts?.data || [];
 
   // Обработка ошибок
   if (error) {
@@ -229,10 +240,13 @@ export function ProductsPage() {
       <DataTable
         columns={filteredColumns}
         data={displayData}
+        rowCount={!searchValue && dataProducts?.pagination.total_records}
         searchPlaceholder="Поиск по названию..."
         searchKey="name"
         isLoading={isLoading}
         handleChangeSearch={setSearchValue}
+        pageSize={pagePagination.pageSize}
+        handleChangePagination={setPagePagination}
         meta={{
           branches: dataBranches || [],
           setEditingProduct,
