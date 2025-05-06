@@ -265,7 +265,7 @@ export function ProductsPage() {
           </DialogHeader>
           <ProductForm
             product={editingProduct}
-            branches={dataBranches ?? []}
+            branches={dataBranches?.data ?? []}
             onSuccess={() => {
               setIsFormOpen(false);
               queryClient.invalidateQueries({ queryKey: ['products'] });

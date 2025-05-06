@@ -15,6 +15,11 @@ import { productApi } from '@/api/productApi'
 const formSchema = z.object({
     name: z.string().min(1, 'Обязательное поле'),
     barcode: z.string().min(1, 'Обязательное поле'),
+    real_price: z
+      .string()
+      .transform(val => (val === '' ? 0 : Number(val))) // Transform empty string to 0, otherwise to number
+      .refine(val => !isNaN(val), { message: 'Цена должна быть числом' })
+      .refine(val => val >= 0, { message: 'Цена должна быть 0 или больше' }),
     price: z
         .string()
         .transform(val => (val === '' ? 0 : Number(val))) // Transform empty string to 0, otherwise to number
@@ -65,6 +70,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
     const defaultValues: FormData = {
         name: product?.name || '',
         barcode: product?.barcode || '',
+        real_price: product?.real_price || 0,
         price: product?.price || 0,
         stock: product?.stock || 0,
         description: product?.description || '',
@@ -84,6 +90,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
             name: data.name,
             barcode: data.barcode,
             price: Number(data.price), // Already transformed by Zod
+            real_price: data.real_price,
             stock: Number(data.stock), // Already transformed by Zod
             description: data.description,
             branch_id: Number(data.branch_id) // Already transformed by Zod
@@ -179,13 +186,27 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
                     )}
                 />
 
-                <div className='grid grid-cols-1 gap-6 sm:grid-cols-2'>
+                <div className='grid grid-cols-1 gap-6 sm:grid-cols-3'>
+                    <FormField
+                      control={form.control}
+                      name='real_price'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Закупочная цена</FormLabel>
+                          <FormControl>
+                            <Input type='number' min={0} step={0.01} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                         control={form.control}
                         name='price'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Цена</FormLabel>
+                                <FormLabel>Рыночная цена</FormLabel>
                                 <FormControl>
                                     <Input type='number' min={0} step={0.01} {...field} />
                                 </FormControl>
@@ -208,6 +229,20 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
                         )}
                     />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name='images'
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>TODO: Изображения (необязательно)</FormLabel>
+                      <FormControl>
+                        <Input type='file' />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                     control={form.control}

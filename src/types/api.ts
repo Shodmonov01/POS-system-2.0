@@ -32,6 +32,7 @@ export interface Branch {
 export interface Product {
     barcode: string;
     name: string;
+    real_price: number,
     price: number;
     category?: string;
     stock: number;
