@@ -11,8 +11,8 @@ export interface ProductSearchParams {
 }
 
 export const productApi = {
-  getAll: (page: number = 1): Promise<AxiosResponse<ApiResponse<Product[]>>> =>
-    apiClient.get('/product/all', { params: { page } }),
+  getAll: (page: number = 1, pageSize: number = 10): Promise<AxiosResponse<ApiResponse<Product[]>>> =>
+    apiClient.get('/product/list', { params: { page, pageSize } }),
 
   getByBarcode: (barcode: string): Promise<AxiosResponse<ApiResponse<Product>>> =>
     apiClient.get(`/product/${barcode}`),
