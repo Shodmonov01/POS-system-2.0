@@ -1,49 +1,66 @@
-import {useMemo, useState} from 'react';
-import {useMutation, useQuery, useQueryClient, UseQueryResult} from '@tanstack/react-query';
-import {ColumnDef} from "@tanstack/react-table";
-import type {AxiosError} from 'axios';
+import type {UseQueryResult} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {ColumnDef} from '@tanstack/react-table';
 import {LoaderPinwheel, Plus} from 'lucide-react';
+import {useMemo, useState} from 'react';
 
 import {cashierApi} from '@/api/cashierApi';
-import {CashierForm} from '@/components/cashiers/CashierForm';
 import {getUserColumns} from '@/components/cashiers/Columns';
+import {CashierForm} from '@/components/cashiers/CashierForm';
 import {DataTable} from '@/components/common/DataTable';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/contexts/AuthContext';
-
+import {useToast} from '@/hooks/use-toast';
+import type {AxiosError} from 'axios';
 import type {Cashier} from '@/types/api';
+
 
 export function UsersPage() {
     const {toast} = useToast();
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
 
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [editingUser, setEditingUser] = useState<Cashier | undefined>()
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<Cashier | undefined>();
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchValue, setSearchValue] = useState('');
 
     const queryClient = useQueryClient();
 
     const {
         data: users = [],
-        isLoading: isUsersLoading,
-        isError: isUsersError,
-        error: usersError,
+        isLoading,
+        error,
     }: UseQueryResult<Cashier[], AxiosError> = useQuery({
-        queryKey: ['users'],
-        queryFn: () => cashierApi.getAll().then(res => res.data),
-        staleTime: 5 * 60 * 1000,
+        queryKey: ['users', page, pageSize],
+        queryFn: () => cashierApi.getAll(page, pageSize).then(res => {
+            return res.data.data
+        }),
+        onError: (err: any) => {
+            toast({
+                variant: 'destructive',
+                title: 'Ошибка загрузки пользователей',
+                description: err.message,
+            });
+        },
+        keepPreviousData: true,
     });
 
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
         onSuccess: () => {
+            toast({title: 'Кассир удалён'});
             queryClient.invalidateQueries({queryKey: ['users']});
         },
         onError: (err: AxiosError) => {
-            console.error('Delete failed:', err.response?.status, err.response?.data);
-            alert(`Could not delete user: ${err.message}`);
+            toast({
+                variant: 'destructive',
+                title: 'Ошибка удаления',
+                description: err.message,
+            });
         },
     });
 
@@ -60,15 +77,15 @@ export function UsersPage() {
     );
 
 
-    if (isUsersLoading) return (
+    if (isLoading) return (
         <div className="centered-spin-icon">
             <LoaderPinwheel className="spin-icon"/>
         </div>
     );
-    if (isUsersError) return <p>Error loading users: {usersError?.message}</p>;
+    if (error) return <p>Error loading users: {error?.message}</p>;
 
     return (
-        <div className="space-y-8">
+        <div className="mx-52 space-y-8">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Пользователи</h2>
                 {isAdmin && (
@@ -87,8 +104,19 @@ export function UsersPage() {
             <DataTable<Cashier>
                 columns={columns}
                 data={users}
+                isLoading={isLoading}
                 searchPlaceholder="Поиск пользователей..."
                 searchKey="name"
+                handleChangeSearch={setSearchValue}
+                meta={{
+                    page,
+                    pageSize,
+                    setPage,
+                    setPageSize,
+                    setEditingUser,
+                    setIsFormOpen,
+                    handleDelete: deleteUser,
+                }}
             />
 
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -101,6 +129,7 @@ export function UsersPage() {
                     <CashierForm
                         cashier={editingUser}
                         onSuccess={() => {
+                            toast({title: 'Сохранено'});
                             queryClient.invalidateQueries({queryKey: ['users']});
                             setIsFormOpen(false);
                         }}
@@ -110,4 +139,5 @@ export function UsersPage() {
             </Dialog>
         </div>
     );
+
 }
