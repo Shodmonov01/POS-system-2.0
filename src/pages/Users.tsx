@@ -1,5 +1,4 @@
-import type {UseQueryResult} from '@tanstack/react-query';
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {ColumnDef} from '@tanstack/react-table';
 import {LoaderPinwheel, Plus} from 'lucide-react';
 import {useMemo, useState} from 'react';
@@ -16,6 +15,8 @@ import type {AxiosError} from 'axios';
 import type {Cashier} from '@/types/api';
 
 
+
+
 export function UsersPage() {
     const {toast} = useToast();
     const {user} = useAuth();
@@ -25,7 +26,7 @@ export function UsersPage() {
     const [editingUser, setEditingUser] = useState<Cashier | undefined>();
 
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(5);
     const [searchValue, setSearchValue] = useState('');
 
     const queryClient = useQueryClient();
@@ -34,20 +35,19 @@ export function UsersPage() {
         data: users = [],
         isLoading,
         error,
-    }: UseQueryResult<Cashier[], AxiosError> = useQuery({
+    } = useQuery<Cashier[], AxiosError, Cashier[], [string, number, number]>({
         queryKey: ['users', page, pageSize],
-        queryFn: () => cashierApi.getAll(page, pageSize).then(res => {
-            return res.data.data
-        }),
-        onError: (err: any) => {
+        queryFn: () => cashierApi.getAll(page, pageSize).then(res => res.data.data),
+        onError: (err) => {
             toast({
                 variant: 'destructive',
                 title: 'Ошибка загрузки пользователей',
-                description: err.message,
+                description: err.response?.data?.message || err.message,
             });
         },
-        keepPreviousData: true,
     });
+
+
 
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
