@@ -1,12 +1,16 @@
-import apiClient from './api'
-import {ApiResponse, Cashier} from '../types/api'
-import {AxiosResponse} from 'axios'
+import {AxiosResponse} from 'axios';
 import {CashierFormFields} from "@/types/forms.ts";
-
+import {ApiResponse, Cashier} from '../types/api';
+import apiClient from './api';
 
 export const cashierApi = {
-    getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> =>
-        apiClient.get<ApiResponse<Cashier[]>>('/cashier/all'),
+    getAll: (
+        page: number,
+        pageSize: number
+    ): Promise<AxiosResponse<ApiResponse<Cashier[]>>> =>
+        apiClient.get<ApiResponse<Cashier[]>>('/cashier/list', {
+            params: {page, pageSize},
+        }),
 
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
         apiClient.get<ApiResponse<Cashier>>(`/cashier/${id}`),
