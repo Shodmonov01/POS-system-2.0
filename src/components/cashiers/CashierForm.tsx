@@ -1,5 +1,6 @@
 import {useForm} from 'react-hook-form';
-import {useMutation, useQuery, useQueryClient, type UseQueryResult} from '@tanstack/react-query';
+import type {UseQueryResult} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import type {AxiosError, AxiosResponse} from 'axios';
 
 
