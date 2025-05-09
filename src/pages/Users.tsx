@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {ColumnDef} from '@tanstack/react-table';
 import {LoaderPinwheel, Plus} from 'lucide-react';
 import {useMemo, useState} from 'react';
@@ -13,8 +13,6 @@ import {useAuth} from '@/contexts/AuthContext';
 import {useToast} from '@/hooks/use-toast';
 import type {AxiosError} from 'axios';
 import type {Cashier} from '@/types/api';
-
-
 
 
 export function UsersPage() {
@@ -32,13 +30,16 @@ export function UsersPage() {
     const queryClient = useQueryClient();
 
     const {
-        data: users = [],
-        isLoading,
-        error,
-    } = useQuery<Cashier[], AxiosError, Cashier[], [string, number, number]>({
-        queryKey: ['users', page, pageSize],
-        queryFn: () => cashierApi.getAll(page, pageSize).then(res => res.data.data),
-        onError: (err) => {
+        data: pagedUsers = [],
+        isLoading: listLoading,
+        error: listError,
+    } = useQuery<Cashier[], AxiosError>({
+        queryKey: ['users', 'list', page, pageSize],
+        queryFn: () =>
+            cashierApi.getAll(page, pageSize).then(res => res.data.data),
+        keepPreviousData: true,
+        enabled: searchValue.trim() === '',
+        onError: err => {
             toast({
                 variant: 'destructive',
                 title: 'Ошибка загрузки пользователей',
@@ -47,7 +48,28 @@ export function UsersPage() {
         },
     });
 
+    const {
+        data: searchResults = [],
+        isLoading: searchLoading,
+        error: searchError,
+    } = useQuery<Cashier[], AxiosError>({
+        queryKey: ['users', 'search', searchValue],
+        queryFn: () =>
+            cashierApi.search(searchValue).then(res => res.data.data),
+        enabled: Boolean(searchValue.trim()),
+        onError: err => {
+            toast({
+                variant: 'destructive',
+                title: 'Ошибка поиска пользователей',
+                description: err.response?.data?.message || err.message,
+            });
+        },
+    });
 
+
+    const users = searchValue.trim() ? searchResults : pagedUsers;
+    const isLoading = searchValue.trim() ? searchLoading : listLoading;
+    const error = searchValue.trim() ? searchError : listError;
 
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
@@ -55,23 +77,22 @@ export function UsersPage() {
             toast({title: 'Кассир удалён'});
             queryClient.invalidateQueries({queryKey: ['users']});
         },
-        onError: (err: AxiosError) => {
+        onError: (err: AxiosError) =>
             toast({
                 variant: 'destructive',
                 title: 'Ошибка удаления',
                 description: err.message,
-            });
-        },
+            }),
     });
 
     const columns: ColumnDef<Cashier>[] = useMemo(
         () =>
             getUserColumns(
-                user => {
+                (user) => {
                     setEditingUser(user);
                     setIsFormOpen(true);
                 },
-                id => deleteUser(id)
+                (id) => deleteUser(id)
             ),
         [deleteUser]
     );
@@ -101,22 +122,18 @@ export function UsersPage() {
                 )}
             </div>
 
+
             <DataTable<Cashier>
                 columns={columns}
                 data={users}
                 isLoading={isLoading}
                 searchPlaceholder="Поиск пользователей..."
                 searchKey="name"
-                handleChangeSearch={setSearchValue}
-                meta={{
-                    page,
-                    pageSize,
-                    setPage,
-                    setPageSize,
-                    setEditingUser,
-                    setIsFormOpen,
-                    handleDelete: deleteUser,
+                onRowClick={(user) => {
+                    setEditingUser(user);
+                    setIsFormOpen(true);
                 }}
+                handleChangeSearch={setSearchValue}
             />
 
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
