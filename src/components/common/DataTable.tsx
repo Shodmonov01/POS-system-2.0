@@ -33,6 +33,7 @@ interface DataTableProps<TData> {
   handleChangeSearch?: (val: string) => void;
   pageSize?: number;
   handleChangePagination?: (val: any) => void;
+  meta: any;
 }
 
 export function DataTable<TData>({
@@ -46,6 +47,7 @@ export function DataTable<TData>({
   handleChangeSearch,
   pageSize = 10,
   handleChangePagination,
+  meta,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -89,6 +91,7 @@ export function DataTable<TData>({
       globalFilter,
       pagination,
     },
+    meta,
   });
 
   // Reset to first page when filter changes
