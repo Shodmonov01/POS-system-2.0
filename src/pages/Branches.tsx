@@ -14,14 +14,20 @@ import {branchApi} from "@/api/branchApi.ts";
 import {Branch} from '@/types';
 import {AxiosError} from "axios";
 import {UseQueryResult} from "@tanstack/react-query/build/modern";
+import {useToast} from "@/hooks/use-toast.ts";
 
 
 export function BranchesPage() {
+    const {toast} = useToast();
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState<Branch | undefined>(undefined);
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [searchValue, setSearchValue] = useState('');
 
     const queryClient = useQueryClient();
 
@@ -31,8 +37,11 @@ export function BranchesPage() {
         isError: isBranchesError,
         error: branchesError,
     }: UseQueryResult<Branch[], AxiosError> = useQuery({
-        queryKey: ['branches'],
-        queryFn: () => branchApi.getAll().then(res => res.data),
+        queryKey: ['branches', 'list', page, pageSize],
+        queryFn: async () => {
+            const res = await branchApi.getAll(page, pageSize);
+            return res.data.data;
+        },
         staleTime: 5 * 60 * 1000,
     });
 
@@ -98,6 +107,10 @@ export function BranchesPage() {
                 data={branches ?? []}
                 searchPlaceholder="Поиск филиалов..."
                 searchKey="name"
+                onRowClick={(branch) => {
+                    setEditingBranch(branch);
+                    setIsFormOpen(true);
+                }}
             />
 
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
