@@ -37,7 +37,6 @@ export function getUserColumns(
             header: () => <div className="text-right">Действия</div>,
             cell: ({row, table}) => {
                 const user: Cashier = row.original;
-                const meta = table?.options?.meta as any;
 
                 return (
                     <div className="flex justify-end">
@@ -59,8 +58,8 @@ export function getUserColumns(
 
                                 <DropdownMenuItem
                                     onClick={(e) => {
-                                        meta.setEditingUser(user);
-                                        meta.setIsFormOpen(true);
+                                        e.stopPropagation();
+                                        onEdit(user);
                                     }}
                                 >
                                     <Edit className="mr-2 h-4 w-4"/>
@@ -68,7 +67,10 @@ export function getUserColumns(
                                 </DropdownMenuItem>
 
                                 <DropdownMenuItem
-                                    onClick={() => meta.handleDelete(user.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(user.id);
+                                    }}
                                     className="text-destructive focus:text-destructive"
                                 >
                                     <Trash className="mr-2 h-4 w-4"/>
