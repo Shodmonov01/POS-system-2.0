@@ -11,20 +11,26 @@ import {Input} from '@/components/ui/input';
 import {Branch} from "@/types";
 import {ApiResponse, Cashier} from '@/types/api';
 import {CashierFormFields, CashierFormProps} from "@/types/forms.ts";
+import {useState} from "react";
 
 
 export function CashierForm({cashier, onSuccess, onCancel}: CashierFormProps) {
     const queryClient = useQueryClient();
+
+    const [page] = useState(1);
+    const [pageSize] = useState(1000);
 
     const {
         data: branches = [],
         isLoading: isBranchesLoading,
         error: branchesError,
     }: UseQueryResult<Branch[], AxiosError> = useQuery({
-        queryKey: ['branches'],
-        queryFn: () => branchApi.getAll().then(res => res.data),
-        staleTime: 5 * 60 * 1000,
-    });
+        queryKey: ['branches', page, pageSize],
+        queryFn: () =>
+          branchApi.getAll(page, pageSize).then(res => res.data),
+          staleTime: 5 * 60 * 1000,
+         });
+
 
     const {
         mutate,
@@ -49,7 +55,7 @@ export function CashierForm({cashier, onSuccess, onCancel}: CashierFormProps) {
         },
 
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ['cashiers']})
+            queryClient.invalidateQueries({queryKey: ['users']})
             onSuccess()
             if (!cashier) {
                 reset();
