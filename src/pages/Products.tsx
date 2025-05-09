@@ -47,7 +47,10 @@ const columns: ColumnDef<Product>[] = [
     accessorKey: 'branch_id',
     header: 'Филиал',
     cell: ({ row, table }) => {
-      const branches = table.options.meta?.branches || [];
+      let branches = table.options.meta?.branches || [];
+      if (branches.data) {
+        branches = branches.data;
+      }
       const branch = branches.find((b: any) => b.id === row.getValue('branch_id'));
       return branch?.name || 'Неизвестный филиал';
     },
@@ -82,6 +85,7 @@ const columns: ColumnDef<Product>[] = [
       const { setEditingProduct, setIsFormOpen, handleDelete } = meta;
 
       return (
+        <div className={'flex justify-end'}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="h-8 w-8 p-0">
@@ -110,6 +114,7 @@ const columns: ColumnDef<Product>[] = [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       );
     },
     enableSorting: false,
