@@ -55,7 +55,7 @@ export function UsersPage() {
     } = useQuery<Cashier[], AxiosError>({
         queryKey: ['users', 'search', searchValue],
         queryFn: () =>
-            cashierApi.search(searchValue).then(res => res.data.data),
+            cashierApi.search(searchValue).then(res => res.data ?? []),
         enabled: Boolean(searchValue.trim()),
         onError: err => {
             toast({
@@ -70,6 +70,8 @@ export function UsersPage() {
     const users = searchValue.trim() ? searchResults : pagedUsers;
     const isLoading = searchValue.trim() ? searchLoading : listLoading;
     const error = searchValue.trim() ? searchError : listError;
+    const isSearching = Boolean(searchValue.trim());
+
 
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
@@ -134,6 +136,7 @@ export function UsersPage() {
                     setIsFormOpen(true);
                 }}
                 handleChangeSearch={setSearchValue}
+                isSearching={isSearching}
             />
 
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
