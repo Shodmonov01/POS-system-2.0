@@ -74,7 +74,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
         price: String(product?.price || 0),
         stock: String(product?.stock || 0),
         description: product?.description || '',
-        branch_id: product?.branch_id || branches.length ? branches[0].id : 0,
+        branch_id: String(product?.branch_id) || branches.length ? String(branches[0].id) : "",
     }
 
     const form = useForm<FormData>({
