@@ -12,6 +12,15 @@ export const cashierApi = {
             params: {page, pageSize},
         }),
 
+    search: (
+        name: string
+    ): Promise<AxiosResponse<ApiResponse<Cashier[]>>> =>
+        apiClient.get<ApiResponse<Cashier[]>>(
+            `/cashier/search-cashier`, {
+                params: {name},
+            }),
+
+
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
         apiClient.get<ApiResponse<Cashier>>(`/cashier/${id}`),
 
