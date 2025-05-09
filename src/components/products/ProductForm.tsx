@@ -70,11 +70,11 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
     const defaultValues: FormData = {
         name: product?.name || '',
         barcode: product?.barcode || '',
-        real_price: product?.real_price || 0,
-        price: product?.price || 0,
-        stock: product?.stock || 0,
+        real_price: String(product?.real_price || 0),
+        price: String(product?.price || 0),
+        stock: String(product?.stock || 0),
         description: product?.description || '',
-        branch_id: product?.branch_id || 0,
+        branch_id: product?.branch_id || branches.length ? branches[0].id : 0,
     }
 
     const form = useForm<FormData>({
@@ -90,7 +90,7 @@ export function ProductForm({ product, branches, onSuccess, onCancel }: ProductF
             name: data.name,
             barcode: data.barcode,
             price: Number(data.price), // Already transformed by Zod
-            real_price: data.real_price,
+            real_price: Number(data.real_price),
             stock: Number(data.stock), // Already transformed by Zod
             description: data.description,
             branch_id: Number(data.branch_id) // Already transformed by Zod
