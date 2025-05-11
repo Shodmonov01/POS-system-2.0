@@ -1,21 +1,23 @@
-import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
-import {AuthProvider} from './contexts/AuthContext';
-import {CartProvider} from './contexts/CartContext';
-import {RequireAuth} from './components/common/RequireAuth';
-import {Layout} from './components/layout/Layout';
-import {LoginPage} from './pages/Login';
-import {Dashboard} from './pages/Dashboard';
-import {ScanerPage} from './pages/Scaner';
-import {ProductsPage} from './pages/Products';
-import {DebtsPage} from './pages/Debts';
-import {ReturnsPage} from './pages/Returns';
-import {UsersPage} from './pages/Users';
-import {BranchesPage} from './pages/Branches';
-import {SettingsPage} from './pages/Settings';
-import {Toaster} from './components/ui/toaster';
-
-import {QueryClient, QueryClientProvider,} from '@tanstack/react-query';
-import {SalesPage} from './pages/Sales';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import { RequireAuth } from './components/common/RequireAuth';
+import { Layout } from './components/layout/Layout';
+import { LoginPage } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+import { ScanerPage } from './pages/Scaner';
+import { ProductsPage } from './pages/Products';
+import { DebtsPage } from './pages/Debts';
+import { ReturnsPage } from './pages/Returns';
+import { UsersPage } from './pages/Users';
+import { BranchesPage } from './pages/Branches';
+import { SettingsPage } from './pages/Settings';
+import { Toaster } from './components/ui/toaster';
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import { SalesPage } from './pages/Sales';
 
 const queryClient = new QueryClient();
 
