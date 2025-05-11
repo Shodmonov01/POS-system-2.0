@@ -108,7 +108,7 @@ export function UsersPage() {
     if (error) return <p>Error loading users: {error?.message}</p>;
 
     return (
-        <div className="mx-52 space-y-8">
+        <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold tracking-tight">Пользователи</h2>
                 {isAdmin && (
