@@ -13,7 +13,6 @@ import { UsersPage } from './pages/Users';
 import { BranchesPage } from './pages/Branches';
 import { SettingsPage } from './pages/Settings';
 import { Toaster } from './components/ui/toaster';
-
 import {
   QueryClient,
   QueryClientProvider,
