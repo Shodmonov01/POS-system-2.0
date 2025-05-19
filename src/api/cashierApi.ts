@@ -6,7 +6,7 @@ import {CashierFormFields} from "@/types/forms.ts";
 
 export const cashierApi = {
     getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> =>
-        apiClient.get<ApiResponse<Cashier[]>>('/cashier/all'),
+        apiClient.get<ApiResponse<Cashier[]>>('/cashier/list'),
 
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> =>
         apiClient.get<ApiResponse<Cashier>>(`/cashier/${id}`),

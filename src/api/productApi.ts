@@ -12,7 +12,7 @@ export interface ProductSearchParams {
 
 export const productApi = {
   getAll: (page: number = 1): Promise<AxiosResponse<ApiResponse<Product[]>>> =>
-    apiClient.get('/product/all', { params: { page } }),
+    apiClient.get('/product/list', { params: { page } }),
 
   getByBarcode: (barcode: string): Promise<AxiosResponse<ApiResponse<Product>>> =>
     apiClient.get(`/product/${barcode}`),
