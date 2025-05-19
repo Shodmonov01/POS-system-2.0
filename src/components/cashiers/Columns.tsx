@@ -1,8 +1,16 @@
 import {ColumnDef} from '@tanstack/react-table';
+import {Edit, MoreHorizontal, Trash} from "lucide-react";
 
 import {Button} from '@/components/ui/button';
-import {Badge} from '@/components/ui/badge';
 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {Cashier} from '@/types/api';
 
 export function getUserColumns(
@@ -10,32 +18,69 @@ export function getUserColumns(
     onDelete: (id: number) => void
 ): ColumnDef<Cashier>[] {
     return [
-        {accessorKey: 'name', header: 'Имя'},
+        {
+            accessorKey: 'name',
+            header: 'Имя',
+            cell: ({row}) => <div className="font-medium">{row.getValue('name')}</div>,
+        },
         {
             accessorKey: 'role',
             header: 'Роль',
             cell: ({row}) => (
-                <Badge variant="outline">
+                <div>
                     {row.getValue('role') === 'admin' ? 'Администратор' : 'Кассир'}
-                </Badge>
+                </div>
             ),
         },
         {
             id: 'actions',
-            header: 'Действия',
-            cell: ({row}) => {
-                const usr = row.original
+            header: () => <div className="text-right">Действия</div>,
+            cell: ({row, table}) => {
+                const user: Cashier = row.original;
+
                 return (
-                    <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => onEdit(usr)}>
-                            Изменить
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => onDelete(usr.id)}>
-                            Удалить
-                        </Button>
+                    <div className="flex justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <span className="sr-only">Открыть меню</span>
+                                    <MoreHorizontal className="h-4 w-4"/>
+                                </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Действия</DropdownMenuLabel>
+                                <DropdownMenuSeparator/>
+
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(user);
+                                    }}
+                                >
+                                    <Edit className="mr-2 h-4 w-4"/>
+                                    Редактировать
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(user.id);
+                                    }}
+                                    className="text-destructive focus:text-destructive"
+                                >
+                                    <Trash className="mr-2 h-4 w-4"/>
+                                    Удалить
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
-                )
+                );
             },
         },
-    ]
+    ];
 }

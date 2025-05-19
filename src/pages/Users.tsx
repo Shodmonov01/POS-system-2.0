@@ -1,20 +1,18 @@
-import {useMemo, useState} from 'react';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {Plus} from 'lucide-react';
-import type {AxiosError} from 'axios';
+import {ColumnDef} from '@tanstack/react-table';
+import {LoaderPinwheel, Plus} from 'lucide-react';
+import {useMemo, useState} from 'react';
 
+import {cashierApi} from '@/api/cashierApi';
+import {getUserColumns} from '@/components/cashiers/Columns';
+import {CashierForm} from '@/components/cashiers/CashierForm';
 import {DataTable} from '@/components/common/DataTable';
 import {Button} from '@/components/ui/button';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {useToast} from '@/hooks/use-toast';
 import {useAuth} from '@/contexts/AuthContext';
-import {CashierForm} from '@/components/cashiers/CashierForm';
-import {getUserColumns} from '@/components/cashiers/Columns';
-import {cashierApi} from '@/api/cashierApi';
-
+import {useToast} from '@/hooks/use-toast';
+import type {AxiosError} from 'axios';
 import type {Cashier} from '@/types/api';
-import {ColumnDef} from "@tanstack/react-table";
-
 
 
 export function UsersPage() {
@@ -22,56 +20,92 @@ export function UsersPage() {
     const {user} = useAuth();
     const isAdmin = user?.role === 'admin';
 
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [editingUser, setEditingUser] = useState<Cashier | undefined>()
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<Cashier | undefined>();
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [searchValue, setSearchValue] = useState('');
 
     const queryClient = useQueryClient();
 
     const {
-        data: users = [],
-        isLoading: isUsersLoading,
-        isError: isUsersError,
-        error: usersError,
+        data: pagedUsers = [],
+        isLoading: listLoading,
+        error: listError,
     } = useQuery<Cashier[], AxiosError>({
-        queryKey: ['users'],
-        staleTime: 5 * 60 * 1000,
-        queryFn: async () => {
-            const res = await cashierApi.getAll();
-            console.log(res.data);
-            return res.data.data ?? [];
-        },
-        onError: () => {
-            toast({title: 'Ошибка загрузки пользователей', variant: 'destructive'});
+        queryKey: ['users', 'list', page, pageSize],
+        queryFn: () =>
+            cashierApi.getAll(page, pageSize).then(res => res.data.data),
+        keepPreviousData: true,
+        enabled: searchValue.trim() === '',
+        onError: err => {
+            toast({
+                variant: 'destructive',
+                title: 'Ошибка загрузки пользователей',
+                description: err.response?.data?.message || err.message,
+            });
         },
     });
 
+    const {
+        data: searchResults = [],
+        isLoading: searchLoading,
+        error: searchError,
+    } = useQuery<Cashier[], AxiosError>({
+        queryKey: ['users', 'search', searchValue],
+        queryFn: () =>
+            cashierApi.search(searchValue).then(res => res.data ?? []),
+        enabled: Boolean(searchValue.trim()),
+        onError: err => {
+            toast({
+                variant: 'destructive',
+                title: 'Ошибка поиска пользователей',
+                description: err.response?.data?.message || err.message,
+            });
+        },
+    });
+
+
+    const users = searchValue.trim() ? searchResults : pagedUsers;
+    const isLoading = searchValue.trim() ? searchLoading : listLoading;
+    const error = searchValue.trim() ? searchError : listError;
+    const isSearching = Boolean(searchValue.trim());
+
+
     const {mutate: deleteUser} = useMutation({
         mutationFn: (id: number) => cashierApi.delete(id),
-        onSuccess: () => queryClient.invalidateQueries({queryKey: ['users']}),
+        onSuccess: () => {
+            toast({title: 'Кассир удалён'});
+            queryClient.invalidateQueries({queryKey: ['users']});
+        },
         onError: (err: AxiosError) =>
             toast({
-                title: 'Ошибка удаления пользователя',
-                description: err.message,
                 variant: 'destructive',
+                title: 'Ошибка удаления',
+                description: err.message,
             }),
     });
 
     const columns: ColumnDef<Cashier>[] = useMemo(
         () =>
             getUserColumns(
-                user => {
+                (user) => {
                     setEditingUser(user);
                     setIsFormOpen(true);
                 },
-                id => deleteUser(id)
+                (id) => deleteUser(id)
             ),
         [deleteUser]
     );
 
-    console.log('🎉 rendering UsersPage, users=', users);
 
-    if (isUsersLoading) return <p>Loading users…</p>;
-    if (isUsersError) return <p>Error loading users: {usersError?.message}</p>;
+    if (isLoading) return (
+        <div className="centered-spin-icon">
+            <LoaderPinwheel className="spin-icon"/>
+        </div>
+    );
+    if (error) return <p>Error loading users: {error?.message}</p>;
 
     return (
         <div className="space-y-8">
@@ -90,11 +124,19 @@ export function UsersPage() {
                 )}
             </div>
 
+
             <DataTable<Cashier>
                 columns={columns}
                 data={users}
+                isLoading={isLoading}
                 searchPlaceholder="Поиск пользователей..."
                 searchKey="name"
+                onRowClick={(user) => {
+                    setEditingUser(user);
+                    setIsFormOpen(true);
+                }}
+                handleChangeSearch={setSearchValue}
+                isSearching={isSearching}
             />
 
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -107,6 +149,7 @@ export function UsersPage() {
                     <CashierForm
                         cashier={editingUser}
                         onSuccess={() => {
+                            toast({title: 'Сохранено'});
                             queryClient.invalidateQueries({queryKey: ['users']});
                             setIsFormOpen(false);
                         }}
@@ -116,4 +159,5 @@ export function UsersPage() {
             </Dialog>
         </div>
     );
+
 }
