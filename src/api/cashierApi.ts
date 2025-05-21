@@ -3,7 +3,7 @@ import { Cashier, ApiResponse } from '../types/api'
 import { AxiosResponse } from 'axios'
 
 export const cashierApi = {
-    getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> => apiClient.get('/cashier/all'),
+    getAll: (): Promise<AxiosResponse<ApiResponse<Cashier[]>>> => apiClient.get('/cashier/list'),
 
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Cashier>>> => apiClient.get(`/cashier/${id}`),
 

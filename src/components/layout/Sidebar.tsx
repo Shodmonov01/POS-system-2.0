@@ -73,12 +73,6 @@ export function Sidebar() {
       icon: <Building className="h-5 w-5" />,
       roles: ['admin'],
     },
-    {
-      href: '/settings',
-      label: 'Настройки',
-      icon: <Settings className="h-5 w-5" />,
-      roles: ['admin'],
-    },
   ];
 
   const filteredLinks = links.filter(

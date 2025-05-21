@@ -4,7 +4,7 @@ import { AxiosResponse } from 'axios'
 
 export const branchApi = {
     //getAll: (): Promise<AxiosResponse<ApiResponse<Branch[]>>> => apiClient.get('/branch/all'),
-    getAll: (): Promise<AxiosResponse<Branch[]>> => apiClient.get('/branch/all'),
+    getAll: (): Promise<AxiosResponse<Branch[]>> => apiClient.get('/branch/list'),
 
     getById: (id: number): Promise<AxiosResponse<ApiResponse<Branch>>> => apiClient.get(`/branch/${id}`),
 
